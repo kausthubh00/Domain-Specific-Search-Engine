@@ -3,12 +3,13 @@ import './App.css'
 
 function App() {
   // --- STATE VARIABLES ---
-  const [query, setQuery] = useState('confidential compliance HIPAA protocols');
+  const [query, setQuery] = useState('network');
   const [isSearching, setIsSearching] = useState(false);
   const [results, setResults] = useState([]);
   const [hasSearched, setHasSearched] = useState(false);
   
-  const [selectedFile, setSelectedFile] = useState(null);
+  // UPLOAD STATE: Now expects an array/FileList of files
+  const [selectedFiles, setSelectedFiles] = useState(null);
   const [uploadMessage, setUploadMessage] = useState("");
 
   // --- SEARCH LOGIC ---
@@ -17,10 +18,8 @@ function App() {
     setHasSearched(false);
     
     try {
-      // THIS IS THE REAL API BRIDGE: React talking to Python
       const response = await fetch(`http://127.0.0.1:5000/api/search?q=${encodeURIComponent(query)}`);
       const data = await response.json();
-      
       setResults(data);
     } catch (error) {
       console.error("Backend connection failed:", error);
@@ -28,25 +27,28 @@ function App() {
       setIsSearching(false);
       setHasSearched(true);
     }
-  }; // <-- THIS CLOSING BRACKET WAS MISSING!
+  }; 
 
-  // --- UPLOAD LOGIC ---
+  // --- BULK UPLOAD LOGIC ---
   const handleFileChange = (event) => {
-    setSelectedFile(event.target.files[0]);
+    // Grabs ALL selected files instead of just the first one
+    setSelectedFiles(event.target.files);
   };
 
   const handleUpload = async () => {
-    if (!selectedFile) {
-        setUploadMessage("Please select a PDF first.");
+    if (!selectedFiles || selectedFiles.length === 0) {
+        setUploadMessage("Please select at least one file first.");
         return;
     }
 
-    // FormData is required when sending files over HTTP!
     const formData = new FormData();
-    formData.append("file", selectedFile);
+    // Loop through all selected files and append them to the request
+    for (let i = 0; i < selectedFiles.length; i++) {
+        formData.append("file", selectedFiles[i]);
+    }
 
     try {
-        setUploadMessage("Uploading...");
+        setUploadMessage(`Uploading ${selectedFiles.length} files...`);
         const response = await fetch("http://127.0.0.1:5000/api/upload", {
             method: "POST",
             body: formData,
@@ -85,19 +87,21 @@ function App() {
         </div>
 
         <div style={{ margin: "20px 0", padding: "15px", border: "1px dashed gray" }}>
-         <h3>Upload New PDF</h3>
+         <h3>Upload Documents (Bulk)</h3>
+          {/* THE MULTIPLE TAG IS ADDED HERE */}
           <input 
             type="file" 
-            accept="application/pdf" 
+            multiple 
+            accept=".pdf,.docx,.txt" 
             onChange={handleFileChange} 
           />
           <button 
             onClick={handleUpload}
             style={{ marginLeft: "10px", padding: "5px 10px", cursor: "pointer" }}
           >
-            Upload File
+            Upload Files
           </button>
-         <p style={{ color: "green", fontSize: "14px" }}>{uploadMessage}</p>
+         <p style={{ color: "green", fontSize: "14px", marginTop: "10px" }}>{uploadMessage}</p>
         </div>
 
         {isSearching && <div className="metrics" style={{ color: '#e3b341' }}>&gt; Sending request to Flask API...</div>}
@@ -105,7 +109,7 @@ function App() {
         {hasSearched && (
             <>
                 <div className="metrics">
-                    &gt; Found {results.length} results | Algorithm: TF-IDF Mock | Memory: 42MB
+                    &gt; Found {results.length} results | Algorithm: TF-IDF | Memory: 42MB
                 </div>
 
                 <div id="results">
