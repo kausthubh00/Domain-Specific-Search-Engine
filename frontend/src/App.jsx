@@ -20,7 +20,7 @@ function App() {
     setHasSearched(false);
     
     try {
-    const response = await fetch(`${API_BASE_URL}/api/search?q=${query}`);
+    const response = await fetch(`${API_BASE_URL}/api/search?q=${encodeURIComponent(query)}`);
       const data = await response.json();
       setResults(data);
     } catch (error) {
@@ -73,7 +73,6 @@ function App() {
     <div className="container">
         <div className="header">
             <h2>Domain-Specific Search</h2>
-          const response = await fetch(`${API_BASE_URL}/api/search?q=${encodeURIComponent(query)}`);
         </div>
         
         <div className="search-box">
@@ -111,7 +110,7 @@ function App() {
         {hasSearched && (
             <>
                 <div className="metrics">
-                    &gt; Found {results.length} results | Algorithm: BM25 + TF-IDF Hybrid | Memory: 42MB
+                    &gt; Found {results.length} results | Algorithm: BM25 + TF-IDF Hybrid
                 </div>
 
                 <div id="results">

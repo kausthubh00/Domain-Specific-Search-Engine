@@ -3,11 +3,23 @@ import time
 
 API_URL = "http://127.0.0.1:5000/api/search"
 
-# UPDATE THESE: Map your test queries to the actual PDF filenames they should return
+# VTU Information Science domain queries mapped to specific index files
 GROUND_TRUTH = {
-    "network": ["Answering_Model_Paper_Questions.pdf", "Data_Communications.pdf"],
-    "osi model": ["Data_Communications.pdf"],
-    "routing": ["Network_Layer.pdf", "Data_Communications.pdf"]
+    "routing": ["unit3-Network_Layer.pdf", "BCS502-module-3-pdf.pdf"],
+    "osi model": ["BCS502-module-3-pdf.pdf", "Answering Model Paper Questions.pdf"],
+    "ip address": ["unit3-Network_Layer.pdf"],
+    "tcp": ["unit3-Network_Layer.pdf", "BCS502-module-3-pdf.pdf"],
+    "bandwidth": ["BCS502-module-3-pdf.pdf"],
+    "packet": ["unit3-Network_Layer.pdf"],
+    "topology": ["BCS502-module-3-pdf.pdf"],
+    "wireless": ["BCS502-module-3-pdf.pdf"],
+    "server": ["Answering Model Paper Questions.pdf"],
+    "client": ["Answering Model Paper Questions.pdf"],
+    "network": ["unit3-Network_Layer.pdf", "BCS502-module-3-pdf.pdf", "Answering Model Paper Questions.pdf"],
+    "protocol": ["unit3-Network_Layer.pdf", "BCS502-module-3-pdf.pdf"],
+    "subnet": ["unit3-Network_Layer.pdf"],
+    "dns": ["Answering Model Paper Questions.pdf"],
+    "latency": ["BCS502-module-3-pdf.pdf"]
 }
 
 def evaluate_engine():
@@ -25,18 +37,23 @@ def evaluate_engine():
                 response = requests.get(f"{API_URL}?q={query}")
                 results = response.json()
                 
-                if not results: continue
+                if not results: 
+                    continue
                 valid_queries += 1
                 
-                # Sort by the current algorithm we are testing
-                results.sort(key=lambda x: float(x['score'].split(f"{algorithm.upper()}: ")[1].split(" |")[0] if algorithm == "bm25" else x['score'].split("TF-IDF: ")[1]), reverse=True)
+                # Sort by the current algorithm
+                if algorithm == "bm25":
+                    results.sort(key=lambda x: float(x['score'].split("BM25: ")[1].split(" |")[0]), reverse=True)
+                else:
+                    results.sort(key=lambda x: float(x['score'].split("TF-IDF: ")[1]), reverse=True)
                 
-                # Precision@5
+                # Standard Precision@5 calculation
                 top_5_paths = [r['path'] for r in results[:5]]
                 hits = sum(1 for doc in expected_docs if doc in top_5_paths)
-                total_precision += hits / min(5, len(results))
+                # Divide by the actual number of results returned (up to 5)
+                total_precision += hits / len(top_5_paths)
                 
-                # MRR
+                # MRR calculation
                 mrr_score = 0
                 for index, result in enumerate(results):
                     if result['path'] in expected_docs:
@@ -45,7 +62,7 @@ def evaluate_engine():
                 total_mrr += mrr_score
                 
             except Exception as e:
-                pass
+                print(f"[!] Error on query '{query}': {e}")
                 
         if valid_queries > 0:
             print(f"--- {algorithm.upper()} RESULTS ---")

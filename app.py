@@ -47,9 +47,11 @@ def extract_text(file_path, filename):
         if filename.endswith('.pdf'):
             with open(file_path, 'rb') as f:
                 reader = PyPDF2.PdfReader(f)
-                for page in reader.pages:
+                for i, page in enumerate(reader.pages):
                     extracted = page.extract_text()
-                    if extracted: text += extracted.lower() + " "
+                    if extracted: 
+                        # Inject a page marker before the page text
+                        text += f" [PG:{i+1}] " + extracted.lower() + " "
         elif filename.endswith('.docx'):
             doc = docx.Document(file_path)
             for para in doc.paragraphs:
@@ -62,23 +64,38 @@ def extract_text(file_path, filename):
     return text
 
 def get_highlighted_snippet(text, query):
-    """Extracts a 15-word window, secures against XSS, and adds <mark> tags."""
-    query_terms = query.lower().split()
+    """Extracts a window, secures against XSS, finds the page number, and highlights ALL matched words."""
+    query_terms = [term for term in query.lower().split() if len(term) > 1]
+    best_snippet = "No preview available."
+    page_num = ""
+
+    # Find the first matching term to center our snippet window
     for term in query_terms:
         match = re.search(r'\b' + re.escape(term) + r'\b', text)
         if match:
+            # Find the closest page marker before this match
+            page_matches = list(re.finditer(r'\[PG:(\d+)\]', text[:match.start()]))
+            if page_matches:
+                page_num = f" (Page {page_matches[-1].group(1)}) "
+            
             start = max(0, match.start() - 60)
             end = min(len(text), match.end() + 60)
+            raw_snippet = text[start:end]
             
-            # Escape the raw text to neutralize malicious scripts
-            raw_snippet = "..." + text[start:end] + "..."
-            safe_snippet = html.escape(raw_snippet)
+            # Clean out the raw page markers from the display text
+            raw_snippet = re.sub(r'\[PG:\d+\]', '', raw_snippet)
             
-            # Apply highlights to the sanitized text
-            pattern = re.compile(f'({re.escape(term)})', re.IGNORECASE)
-            return pattern.sub(r'<mark>\1</mark>', safe_snippet)
+            safe_snippet = html.escape("..." + raw_snippet + "...")
+            best_snippet = page_num + safe_snippet
+            break
+
+    if best_snippet != "No preview available.":
+        # Highlight EVERY query word in the final safe snippet
+        for term in query_terms:
+            pattern = re.compile(f'({re.escape(html.escape(term))})', re.IGNORECASE)
+            best_snippet = pattern.sub(r'<mark>\1</mark>', best_snippet)
             
-    return html.escape(text[:120]) + "..." if text else "No preview available."
+    return best_snippet
 
 # --- API ROUTES ---
 @app.route('/api/upload', methods=['POST'])
@@ -101,6 +118,13 @@ def upload_file():
         cache_path = os.path.join(DATA_FOLDER, safe_filename + ".txt")
         with open(cache_path, 'w', encoding='utf-8') as f:
             f.write(text)
+        # Prevent double-counting by purging old index data for this file
+        if safe_filename in DOCUMENT_METADATA:
+            for word in list(REAL_INVERTED_INDEX.keys()):
+                if safe_filename in REAL_INVERTED_INDEX[word]:
+                    del REAL_INVERTED_INDEX[word][safe_filename]
+                    if not REAL_INVERTED_INDEX[word]: # Remove empty words
+                        del REAL_INVERTED_INDEX[word]
             
         words = [w for w in "".join(e if e.isalnum() or e.isspace() else " " for e in text).split() if len(w) > 1]
         
