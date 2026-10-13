@@ -73,7 +73,7 @@ function App() {
     <div className="container">
         <div className="header">
             <h2>Domain-Specific Search</h2>
-            <div className="status-badge">Nodes: 3 (Master + 2) | O(1) Indexing</div>
+          const response = await fetch(`${API_BASE_URL}/api/search?q=${encodeURIComponent(query)}`);
         </div>
         
         <div className="search-box">

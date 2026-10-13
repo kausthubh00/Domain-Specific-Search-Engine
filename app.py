@@ -98,8 +98,7 @@ def upload_file():
         
         text = extract_text(file_path, safe_filename)
         
-        # FIX: Save a lightning-fast text cache so search snippets are instant
-        cache_path = os.path.join(DATA_FOLDER, file.filename + ".txt")
+        cache_path = os.path.join(DATA_FOLDER, safe_filename + ".txt")
         with open(cache_path, 'w', encoding='utf-8') as f:
             f.write(text)
             
@@ -107,20 +106,20 @@ def upload_file():
         
         if not words: continue
             
-        DOCUMENT_METADATA[file.filename] = {
-            "title": file.filename,
-            "path": file.filename, 
+        DOCUMENT_METADATA[safe_filename] = {
+            "title": safe_filename,
+            "path": safe_filename, 
             "total_words": len(words)
         }
         
         for word in words:
             if word not in REAL_INVERTED_INDEX:
                 REAL_INVERTED_INDEX[word] = {}
-            if file.filename not in REAL_INVERTED_INDEX[word]:
-                REAL_INVERTED_INDEX[word][file.filename] = 0
-            REAL_INVERTED_INDEX[word][file.filename] += 1
+            if safe_filename not in REAL_INVERTED_INDEX[word]:
+                REAL_INVERTED_INDEX[word][safe_filename] = 0
+            REAL_INVERTED_INDEX[word][safe_filename] += 1
             
-        uploaded_names.append(file.filename)
+        uploaded_names.append(safe_filename)
         
     save_database()
     return jsonify({"message": f"Successfully uploaded {len(uploaded_names)} files!"}), 200
