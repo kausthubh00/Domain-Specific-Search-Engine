@@ -1,5 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from werkzeug.utils import secure_filename
+import html
 import os
 import json
 import PyPDF2
@@ -60,17 +62,23 @@ def extract_text(file_path, filename):
     return text
 
 def get_highlighted_snippet(text, query):
-    """Extracts a 15-word window around the query and adds <mark> tags."""
+    """Extracts a 15-word window, secures against XSS, and adds <mark> tags."""
     query_terms = query.lower().split()
     for term in query_terms:
         match = re.search(r'\b' + re.escape(term) + r'\b', text)
         if match:
             start = max(0, match.start() - 60)
             end = min(len(text), match.end() + 60)
-            snippet = "..." + text[start:end] + "..."
+            
+            # Escape the raw text to neutralize malicious scripts
+            raw_snippet = "..." + text[start:end] + "..."
+            safe_snippet = html.escape(raw_snippet)
+            
+            # Apply highlights to the sanitized text
             pattern = re.compile(f'({re.escape(term)})', re.IGNORECASE)
-            return pattern.sub(r'<mark>\1</mark>', snippet)
-    return text[:120] + "..." if text else "No preview available."
+            return pattern.sub(r'<mark>\1</mark>', safe_snippet)
+            
+    return html.escape(text[:120]) + "..." if text else "No preview available."
 
 # --- API ROUTES ---
 @app.route('/api/upload', methods=['POST'])
@@ -84,10 +92,11 @@ def upload_file():
     for file in files:
         if file.filename == '': continue
             
-        file_path = os.path.join(DATA_FOLDER, file.filename)
+        safe_filename = secure_filename(file.filename)
+        file_path = os.path.join(DATA_FOLDER, safe_filename)
         file.save(file_path)
         
-        text = extract_text(file_path, file.filename)
+        text = extract_text(file_path, safe_filename)
         
         # FIX: Save a lightning-fast text cache so search snippets are instant
         cache_path = os.path.join(DATA_FOLDER, file.filename + ".txt")
@@ -182,5 +191,6 @@ def execute_search():
     return jsonify(results)
 
 if __name__ == '__main__':
-    print("Starting Final VTU Engine on port 5000...")
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    port = int(os.environ.get("PORT", 5000))
+    print(f"Starting Final VTU Engine on port {port}...")
+    app.run(host='0.0.0.0', port=port, debug=False)

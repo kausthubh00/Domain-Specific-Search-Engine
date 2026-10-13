@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import './App.css'
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
+
 function App() {
   // --- STATE VARIABLES ---
   const [query, setQuery] = useState('network');
@@ -18,7 +20,7 @@ function App() {
     setHasSearched(false);
     
     try {
-      const response = await fetch(`http://127.0.0.1:5000/api/search?q=${encodeURIComponent(query)}`);
+    const response = await fetch(`${API_BASE_URL}/api/search?q=${query}`);
       const data = await response.json();
       setResults(data);
     } catch (error) {
@@ -49,7 +51,7 @@ function App() {
 
     try {
         setUploadMessage(`Uploading ${selectedFiles.length} files...`);
-        const response = await fetch("http://127.0.0.1:5000/api/upload", {
+       const response = await fetch(`${API_BASE_URL}/api/upload`, {
             method: "POST",
             body: formData,
         });
