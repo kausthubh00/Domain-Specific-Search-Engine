@@ -109,23 +109,26 @@ function App() {
         {hasSearched && (
             <>
                 <div className="metrics">
-                    &gt; Found {results.length} results | Algorithm: TF-IDF | Memory: 42MB
+                    &gt; Found {results.length} results | Algorithm: BM25 + TF-IDF Hybrid | Memory: 42MB
                 </div>
 
                 <div id="results">
-                    {results.map((result, index) => (
-                        <div className="result" key={index}>
-                            <h3 className="result-title">{result.title}</h3>
-                            <p className="result-path">{result.path}</p>
-                            <p className="result-snippet">{result.snippet}</p>
-                            <div className="tags">
-                                <span className="score-tag">{result.score}</span>
-                                <span className="score-tag">{result.tag}</span>
-                            </div>
-                        </div>
-                    ))}
-                    {results.length === 0 && <p style={{color: '#8b949e'}}>No matching documents found in index.</p>}
-                </div>
+    {results.map((result, index) => (
+        <div className="result" key={index}>
+            <h3 className="result-title">{result.title}</h3>
+            <p className="result-path">{result.path}</p>
+            
+            {/* REPLACE the old snippet line with dangerouslySetInnerHTML so the yellow highlights render */}
+            <p className="result-snippet" dangerouslySetInnerHTML={{ __html: result.snippet }} />
+            
+            <div className="tags">
+                <span className="score-tag">{result.score}</span>
+                <span className="score-tag">{result.tag}</span>
+            </div>
+        </div>
+    ))}
+    {results.length === 0 && <p style={{color: '#8b949e'}}>No matching documents found in index.</p>}
+</div>
             </>
         )}
     </div>
