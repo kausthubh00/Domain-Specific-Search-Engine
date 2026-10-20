@@ -8,7 +8,9 @@ Developed for the Dr. AIT Information Science & Engineering curriculum.
 
 ## Screenshots
 ![Desktop Home](screenshots/desktop-home.png)
+
 ![Search Results](screenshots/search-results.png)
+
 ![Mobile View](screenshots/mobile-view.png)
 
 ## Features
