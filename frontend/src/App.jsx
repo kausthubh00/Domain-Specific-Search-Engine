@@ -127,7 +127,7 @@ function App() {
                 <span className="score-tag">{result.tag}</span>
                 {/* ADD THE  OPEN DOCUMENT BUTTON HERE */}
                 <a
-                  href={'${API_BASE_URL}/api/files/${encodeURIComponent(result.path)}'}
+                  href={`${API_BASE_URL}/api/files/${encodeURIComponent(result.path)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="score-tag"
