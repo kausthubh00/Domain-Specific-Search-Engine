@@ -7,7 +7,9 @@ Developed for the Dr. AIT Information Science & Engineering curriculum.
 **Live demo:** [add your Render URL here]
 
 ## Screenshots
-[add 2-3 screenshots: home page, search results, mobile view]
+![alt text](image.png)
+![alt text](image-1.png)
+![alt text](image-2.png)
 
 ## Features
 - **Ranked search:** BM25 ranking, with TF-IDF scores shown for comparison.
@@ -58,14 +60,19 @@ Test set: **[N] indexed documents, 15 queries** (`evaluate.py`). Relevance was j
 
 | Method | Hits@1 | Recall@5 | MRR |
 |---|---|---|---|
-| BM25 | 93.3% | 0.823 | 0.967 |
-| TF-IDF (smoothed) | 86.7% | 0.823 | 0.933 |
+| BM25 | 93.3% | 0.816 | 0.956 |
+| TF-IDF (smoothed) | 93.3% | 0.816 | 0.956 |
 
-- **Hits@1:** share of queries where the top result is relevant.
+- **Hits@1:** share of queries where the top result is relevant (14 of 15 here).
 - **Recall@5:** share of relevant documents found in the top 5.
 - **MRR:** mean of 1 / rank of the first relevant result.
 
 Run it yourself with the backend running: `python evaluate.py`
+
+**Reading the results honestly**
+- BM25 and TF-IDF performed identically on this test set. On a collection this small, both rankers pick the same top documents, so the difference between them is not visible. A larger corpus with more varied document lengths would be needed to compare them properly.
+- With so few documents and several marked relevant per query, random ranking would already score roughly 50% Hits@1, so these results show the engine ranks well above chance, not that the test is hard.
+- The textbook (*Data Communications and Networking*) is marked relevant for every query. Because it is large and broad, it often ranks first, so Hits@1 is optimistic. A stricter test with narrower queries and the textbook excluded is planned.
 
 **Reading the results honestly**
 - BM25 is ahead on Hits@1 by one query out of 15, so the difference is small and not conclusive on a collection this size.
