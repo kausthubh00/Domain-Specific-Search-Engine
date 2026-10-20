@@ -4,7 +4,7 @@ A full-stack search engine for academic study material (PDF, DOCX, TXT). It buil
 
 Developed for the Dr. AIT Information Science & Engineering curriculum.
 
-**Live demo:** https://domain-specific-search-engine.onrender.com
+**Live demo:** https://domain-specific-search-engine-1nrender.com
 
 ## Screenshots
 ![Desktop Home](screenshots/desktop-home.png)
@@ -54,8 +54,9 @@ Developed for the Dr. AIT Information Science & Engineering curriculum.
    npm install
    npm run dev
 ```
-   By default the frontend uses the live Render backend; 
-   set VITE_API_URL=[http://127.0.0.1:5000](http://127.0.0.1:5000) to use a local backend.
+   By default the frontend uses the live Render backend. To use a local backend,
+   create `frontend/.env.local` containing:
+   VITE_API_URL=http://127.0.0.1:5000
 
 4. Open the web page and upload your PDFs before searching. The `data/` folder is not stored in the repository.
 
@@ -66,6 +67,8 @@ Test set: **7 indexed documents, 15 queries** (`evaluate.py`). Relevance was jud
 |---|---|---|---|
 | BM25 | 93.3% | 0.816 | 0.956 |
 | TF-IDF (smoothed) | 80.0% | 0.829 | 0.878 |
+
+Run it yourself with the backend running: `python evaluate.py`
 
 - **Hits@1:** share of queries where the top result is relevant (BM25: 14 of 15, TF-IDF: 12 of 15).
 - **Recall@5:** share of relevant documents found in the top 5.
