@@ -166,7 +166,7 @@ def execute_search():
         if word in REAL_INVERTED_INDEX:
             docs_containing_word = len(REAL_INVERTED_INDEX[word])
             
-            idf_tfidf = math.log(total_documents / float(docs_containing_word))
+            idf_tfidf = math.log((total_documents + 1) / (docs_containing_word+1)) + 1.0
             idf_bm25 = math.log(((total_documents - docs_containing_word + 0.5) / (docs_containing_word + 0.5)) + 1.0)
             
             for filename, term_count in REAL_INVERTED_INDEX[word].items():

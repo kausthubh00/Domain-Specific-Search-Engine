@@ -64,6 +64,7 @@ function App() {
             setUploadMessage("Error: " + data.error);
         }
     } catch (error) {
+        console.error(error);
         setUploadMessage("Failed to connect to the server.");
     }
   };
