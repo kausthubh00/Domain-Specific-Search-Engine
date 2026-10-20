@@ -4,7 +4,7 @@ A full-stack search engine for academic study material (PDF, DOCX, TXT). It buil
 
 Developed for the Dr. AIT Information Science & Engineering curriculum.
 
-**Live demo:** [add your Render URL here]
+**Live demo:** https://domain-specific-search-engine.onrender.com
 
 ## Screenshots
 ![alt text](image.png)
@@ -56,7 +56,7 @@ Developed for the Dr. AIT Information Science & Engineering curriculum.
 4. Open the web page and upload your PDFs before searching. The `data/` folder is not stored in the repository.
 
 ## Evaluation (BM25 vs TF-IDF)
-Test set: **[N] indexed documents, 15 queries** (`evaluate.py`). Relevance was judged manually per query: a document counts as relevant if it covers the query topic.
+Test set: **7 indexed documents, 15 queries** (`evaluate.py`). Relevance was judged manually per query: a document counts as relevant if it covers the query topic.
 
 | Method | Hits@1 | Recall@5 | MRR |
 |---|---|---|---|
