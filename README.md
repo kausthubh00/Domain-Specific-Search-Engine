@@ -11,10 +11,9 @@ Developed for the Dr. AIT Information Science & Engineering curriculum.
 * **Secure Pipeline:** Backend guarded against directory traversal attacks via `secure_filename()` implementation.
 
 ## Evaluation Metrics (BM25 vs TF-IDF)
-*(Based on 15 ground-truth academic queries)*
-* **BM25:** MRR: 0.8500 | Precision@5: 0.8200
-* **TF-IDF:** MRR: 0.6500 | Precision@5: 0.5800
-* **Average Retrieval Speed:** ~0.015 sec/query
+*(Based on ground-truth academic queries)*
+* **BM25:** MRR: 0.3846 | Precision@5: 0.1923 | Speed: ~0.25 sec/query
+* **TF-IDF:** MRR: 0.3846 | Precision@5: 0.1923 | Speed: ~0.05 sec/query
 
 ## Local Setup
 1. `git clone https://github.com/kausthubh00/Domain-Specific-Search-Engine.git`

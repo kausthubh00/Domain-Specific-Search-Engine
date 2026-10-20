@@ -16,14 +16,20 @@ body {
 }
 
 .container { 
-    width: 900px; 
+    width: 100%;
+    max-width: 900px; 
     background: #161b22; 
     border: 1px solid #30363d;
     border-radius: 12px; 
     padding: 40px; 
+    box-sizing: border-box;
     box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
 }
-
+@media (max-width: 600px) {
+    .container{
+        padding: 20px;
+    }
+}
 .header {
     display: flex;
     justify-content: space-between;
