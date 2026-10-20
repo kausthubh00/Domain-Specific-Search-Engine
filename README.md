@@ -4,7 +4,7 @@ A full-stack search engine for academic study material (PDF, DOCX, TXT). It buil
 
 Developed for the Dr. AIT Information Science & Engineering curriculum.
 
-**Live demo:** https://domain-specific-search-engine-1nrender.com
+**Live demo:** https://domain-specific-search-engine-1.onrender.com
 
 ## Screenshots
 ![Desktop Home](screenshots/desktop-home.png)
