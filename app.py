@@ -83,7 +83,7 @@ def get_highlighted_snippet(text, query):
             raw_snippet = text[start:end]
             
             # Clean out the raw page markers from the display text
-            raw_snippet = re.sub(r'\[PG:\d+\]', '', raw_snippet)
+            raw_snippet = re.sub(r'\[?PG:\d+\]?', '', raw_snippet)
             
             safe_snippet = html.escape("..." + raw_snippet + "...")
             best_snippet = page_num + safe_snippet
@@ -146,7 +146,7 @@ def upload_file():
         uploaded_names.append(safe_filename)
         
     save_database()
-    return jsonify({"message": f"Successfully uploaded {len(uploaded_names)} files!"}), 200
+    return jsonify({"message": f"Successfully uploaded {len(uploaded_names)} of {len(files)} files!"}), 200
 
 @app.route('/api/search', methods=['GET'])
 def execute_search():

@@ -7,9 +7,9 @@ Developed for the Dr. AIT Information Science & Engineering curriculum.
 **Live demo:** https://domain-specific-search-engine.onrender.com
 
 ## Screenshots
-![alt text](image-3.png)
-![alt text](image-4.png)
-![alt text](image-5.png)
+![Desktop Home](screenshots/desktop-home.png)
+![Search Results](screenshots/search-results.png)
+![Mobile View](screenshots/mobile-view.png)
 
 ## Features
 - **Ranked search:** BM25 ranking, with TF-IDF scores shown for comparison.
@@ -74,10 +74,6 @@ Run it yourself with the backend running: `python evaluate.py`
 - With so few documents and several marked relevant per query, random ranking would already score roughly 50% Hits@1, so these results show the engine ranks well above chance, not that the test is hard.
 - The textbook (*Data Communications and Networking*) is marked relevant for every query. Because it is large and broad, it often ranks first, so Hits@1 is optimistic. A stricter test with narrower queries and the textbook excluded is planned.
 
-**Reading the results honestly**
-- BM25 is ahead on Hits@1 by one query out of 15, so the difference is small and not conclusive on a collection this size.
-- The textbook (*Data Communications and Networking*) is marked relevant for every query. Because it is large and broad, it often ranks first, so Hits@1 is optimistic. A stricter test with narrower queries and the textbook excluded is planned.
-
 ## Limitations
 - Small corpus and small query set.
 - Exact-word matching only (no stemming or spell correction), so "router" does not match "routers".
@@ -90,6 +86,7 @@ Run it yourself with the backend running: `python evaluate.py`
 - **Start command:** `gunicorn app:app`
 - Set `VITE_API_URL` to the backend URL when building the frontend.
 - Re-upload documents after each deploy.
+
 
 ## Future work
 - Stemming and spell correction ("did you mean")
