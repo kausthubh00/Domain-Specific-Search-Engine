@@ -214,7 +214,7 @@ def execute_search():
     return jsonify(results)
 @app.route('/api/files/<filename>')
 def serve_file(filename):
-    """Allows the forntend to view and download the uploaded documents"""
+    """Allows the frontend to view and download the uploaded documents"""
     return send_from_directory(DATA_FOLDER, filename)
 
 if __name__ == '__main__':

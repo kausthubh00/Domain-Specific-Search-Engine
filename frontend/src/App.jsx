@@ -13,9 +13,6 @@ function App() {
   // UPLOAD STATE: Now expects an array/FileList of files
   const [selectedFiles, setSelectedFiles] = useState(null);
   const [uploadMessage, setUploadMessage] = useState("");
-
-  // --- DOCUMENT COUNT---
-  const [docCount, setDocCount] = useState(0);
     
   // --- SEARCH LOGIC ---
   const handleSearch = async () => {
@@ -106,13 +103,6 @@ function App() {
             Upload Files
           </button>
          <p style={{ color: "green", fontSize: "14px", marginTop: "10px" }}>{uploadMessage}</p>
-         <div className="upload-box">
-           <input type="file" multiple onChange={(e) => setFiles(e.target.files)} />
-           <buton onClick={handleUpload} className="upload-btn">Upload Documents</buton>
-           {uploadStatus && <p className="status-text">{uploadStatus}</p>}
-           <p className="doc-count-note">Make Sure Your PDF's are successfully uploaded Before searching.</p>
-         </div>
-
         </div>
 
         {isSearching && <div className="metrics" style={{ color: '#e3b341' }}>&gt; Sending request to Flask API...</div>}
@@ -137,7 +127,7 @@ function App() {
                 <span className="score-tag">{result.tag}</span>
                 {/* ADD THE  OPEN DOCUMENT BUTTON HERE */}
                 <a
-                  href={'${API_BASE_URL}/api/files/${result.path}'}
+                  href={'${API_BASE_URL}/api/files/${encodeURIComponent(result.path)}'}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="score-tag"
