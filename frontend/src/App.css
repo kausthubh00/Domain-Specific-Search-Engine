@@ -18,6 +18,7 @@ body {
 .container { 
     width: 100%;
     max-width: 900px; 
+    margin: 0 auto;
     background: #161b22; 
     border: 1px solid #30363d;
     border-radius: 12px; 
@@ -175,3 +176,7 @@ button:hover {
     border-radius: 4px;
     border: 1px solid #d2992240;
 }
+input { min-width: 0; }
+.search-box button { flex-shrink: 0; padding: 0 14px;}
+.tags { flex-wrap: wrap; gap: 8px; }
+

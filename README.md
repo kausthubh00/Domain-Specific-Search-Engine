@@ -7,9 +7,9 @@ Developed for the Dr. AIT Information Science & Engineering curriculum.
 **Live demo:** https://domain-specific-search-engine.onrender.com
 
 ## Screenshots
-![alt text](image.png)
-![alt text](image-1.png)
-![alt text](image-2.png)
+![alt text](image-3.png)
+![alt text](image-4.png)
+![alt text](image-5.png)
 
 ## Features
 - **Ranked search:** BM25 ranking, with TF-IDF scores shown for comparison.
