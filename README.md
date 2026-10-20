@@ -54,7 +54,9 @@ Developed for the Dr. AIT Information Science & Engineering curriculum.
    npm install
    npm run dev
 ```
-   To use a different backend URL, set `VITE_API_URL` (default `http://127.0.0.1:5000`).
+   By default the frontend uses the live Render backend; 
+   set VITE_API_URL=[http://127.0.0.1:5000](http://127.0.0.1:5000) to use a local backend.
+
 4. Open the web page and upload your PDFs before searching. The `data/` folder is not stored in the repository.
 
 ## Evaluation (BM25 vs TF-IDF)
@@ -63,16 +65,14 @@ Test set: **7 indexed documents, 15 queries** (`evaluate.py`). Relevance was jud
 | Method | Hits@1 | Recall@5 | MRR |
 |---|---|---|---|
 | BM25 | 93.3% | 0.816 | 0.956 |
-| TF-IDF (smoothed) | 93.3% | 0.816 | 0.956 |
+| TF-IDF (smoothed) | 80.0% | 0.829 | 0.878 |
 
-- **Hits@1:** share of queries where the top result is relevant (14 of 15 here).
+- **Hits@1:** share of queries where the top result is relevant (BM25: 14 of 15, TF-IDF: 12 of 15).
 - **Recall@5:** share of relevant documents found in the top 5.
 - **MRR:** mean of 1 / rank of the first relevant result.
 
-Run it yourself with the backend running: `python evaluate.py`
-
 **Reading the results honestly**
-- BM25 and TF-IDF performed identically on this test set. On a collection this small, both rankers pick the same top documents, so the difference between them is not visible. A larger corpus with more varied document lengths would be needed to compare them properly.
+- BM25 put a relevant document first for 2 more queries than TF-IDF (14 vs 12 of 15), and has a higher MRR. TF-IDF is marginally ahead on Recall@5 (0.829 vs 0.816). With only 15 queries and a small corpus, these differences are suggestive, not conclusive.
 - With so few documents and several marked relevant per query, random ranking would already score roughly 50% Hits@1, so these results show the engine ranks well above chance, not that the test is hard.
 - The textbook (*Data Communications and Networking*) is marked relevant for every query. Because it is large and broad, it often ranks first, so Hits@1 is optimistic. A stricter test with narrower queries and the textbook excluded is planned.
 
