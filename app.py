@@ -8,6 +8,7 @@ import PyPDF2
 import docx
 import math
 import re
+import shutil
 
 app = Flask(__name__)
 # Explicitly allow all origins so the frontend never gets blocked
@@ -212,8 +213,45 @@ def execute_search():
         })
 
     return jsonify(results)
+def initialize_sample_docs():
+    """Auto-indexes files from sample_docs if render wiped the data folder"""
+    sample_dir = "sample_docs"
+    # If the folder doesn't exist, or if we already have documents indexed, do nothing.
+    if not  os.path.exists(sample_dir) or len(DOCUMENT_METADATA) > 0:
+        return
+    print("[INFO] render restart detected. Auto-indexing sample document...")
+    for filename in os.listdir(sample_dir):
+        if filename.startswith('.'):continue
+        
+        # Copy file to the active data folder
+        src=os.path.join(sample_dir, filename)
+        dest=os.path.join(DATA_FOLDER, filename)
+        shutil.copy(src, dest)
+        
+        # Extract , cache , and index
+        text=extract_text(dest, filename)
+        with open(os.path.join(DATA_FOLDER, filename + ".txt"), 'w', encoding='utf-8') as f:
+            f.write(text)
+        
+        words=[w for w in "".join(e if e.isalnum() or e.isspace() else " " for e in text).split() if len(w) > 1]
+        if not words: continue
+        
+        DOCUMENT_METADATA[filename]={"title": filename, "path":filename, "total_words":len(words)}
+        for word in words:
+            if word not in REAL_INVERTED_INDEX:
+                REAL_INVERTED_INDEX[word]={}
+            if filename not in REAL_INVERTED_INDEX[word]:
+                REAL_INVERTED_INDEX[word][filename] = 0
+            REAL_INVERTED_INDEX[word][filename] += 1;
+        
+    save_database()
+    print("[INFO] Auto-indexing complete!")
+    
+initialize_sample_docs()       
+
 @app.route('/api/files/<filename>')
 def serve_file(filename):
+    
     """Allows the frontend to view and download the uploaded documents"""
     return send_from_directory(DATA_FOLDER, filename)
 
