@@ -9,6 +9,11 @@ import docx
 import math
 import re
 import shutil
+import nltk
+from nltk.stem import PorterStemmer
+
+stemmer=PorterStemmer()
+
 
 app = Flask(__name__)
 # Explicitly allow all origins so the frontend never gets blocked
@@ -64,39 +69,43 @@ def extract_text(file_path, filename):
         print(f"[ERROR] Could not read {filename}: {e}")
     return text
 
+def highlight_words(raw_text, query_stems):
+    """Escape the text, and wrap every word whose stem matches a query stem in <mark>"""
+    out=[]
+    last = 0
+    for m in re.finditer(r'[a-z0-9]+', raw_text):
+        if stemmer.stem(m.group()) in query_stems:
+            out.append(html.escape(raw_text[last:m.start()]))
+            out.append('<mark>' + html.escape(m.group()) + '</mark>')
+            last=m.end()
+    out.append(html.escape(raw_text[last:]))
+    return ''.join(out)
+    
 def get_highlighted_snippet(text, query):
-    """Extracts a window, secures against XSS, finds the page number, and highlights ALL matched words."""
-    query_terms = [term for term in query.lower().split() if len(term) > 1]
-    best_snippet = "No preview available."
-    page_num = ""
-
+    """Finds a window around the first match, adds the page number, escapes the text (XSS-safe),
+    and highlights every word whose stem matches a query word (router / routers / routing)."""
+    query_terms = [t for t in re.findall(r'[a-z0-9]+', query.lower()) if len(t) > 1]
+    query_stems={stemmer.stem(t) for t in query_terms}
+    
     # Find the first matching term to center our snippet window
     for term in query_terms:
-        match = re.search(r'\b' + re.escape(term) + r'\b', text)
-        if match:
-            # Find the closest page marker before this match
-            page_matches = list(re.finditer(r'\[PG:(\d+)\]', text[:match.start()]))
-            if page_matches:
-                page_num = f" (Page {page_matches[-1].group(1)}) "
+        stem=stemmer.stem(term)
+        match = re.search(r'\b' + re.escape(stem), text) or re.search(r'\b' + re.escape(term), text)
+        if not match:continue
+           
+        page_matches = list(re.finditer(r'\[PG:(\d+)\]', text[:match.start()]))
+        page_label = f" (Page {page_matches[-1].group(1)})" if page_matches else ""
+       
+      
             
-            start = max(0, match.start() - 60)
-            end = min(len(text), match.end() + 60)
-            raw_snippet = text[start:end]
-            
-            # Clean out the raw page markers from the display text
-            raw_snippet = re.sub(r'\[?PG:\d+\]?', '', raw_snippet)
-            
-            safe_snippet = html.escape("..." + raw_snippet + "...")
-            best_snippet = page_num + safe_snippet
-            break
+        start = max(0, match.start() - 60)
+        end = min(len(text), match.end() + 60)
+        
+        window=re.sub(r'\[?PG:\d+\]?', '', text[start:end])
+        return page_label + "..." + highlight_words(window, query_stems) + "..."
+    
+    return "No preview available" 
 
-    if best_snippet != "No preview available.":
-        # Highlight EVERY query word in the final safe snippet
-        for term in query_terms:
-            pattern = re.compile(f'({re.escape(html.escape(term))})', re.IGNORECASE)
-            best_snippet = pattern.sub(r'<mark>\1</mark>', best_snippet)
-            
-    return best_snippet
 
 # --- API ROUTES ---
 @app.route('/api/upload', methods=['POST'])
@@ -137,7 +146,8 @@ def upload_file():
             "total_words": len(words)
         }
         
-        for word in words:
+        for raw_word in words:
+            word=stemmer.stem(raw_word)
             if word not in REAL_INVERTED_INDEX:
                 REAL_INVERTED_INDEX[word] = {}
             if safe_filename not in REAL_INVERTED_INDEX[word]:
@@ -154,7 +164,10 @@ def execute_search():
     query = request.args.get('q', '').lower().strip()
     search_words = [w for w in "".join(e if e.isalnum() or e.isspace() else " " for e in query).split() if len(w) > 1]
     
-    if not search_words: return jsonify([])
+    # Stem the query so 'routers' become 'router'
+    stemmed_words=[stemmer.stem(w) for w in search_words]
+    
+    if not stemmed_words: return jsonify([])
 
     document_scores = {}
     total_documents = len(DOCUMENT_METADATA)
@@ -163,7 +176,7 @@ def execute_search():
     k1 = 1.5
     b = 0.75
 
-    for word in search_words:
+    for word in stemmed_words:
         if word in REAL_INVERTED_INDEX:
             docs_containing_word = len(REAL_INVERTED_INDEX[word])
             
@@ -237,7 +250,8 @@ def initialize_sample_docs():
         if not words: continue
         
         DOCUMENT_METADATA[filename]={"title": filename, "path":filename, "total_words":len(words)}
-        for word in words:
+        for raw_word in words:
+            word=stemmer.stem(raw_word)
             if word not in REAL_INVERTED_INDEX:
                 REAL_INVERTED_INDEX[word]={}
             if filename not in REAL_INVERTED_INDEX[word]:
