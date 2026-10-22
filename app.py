@@ -19,6 +19,9 @@ app = Flask(__name__)
 # Explicitly allow all origins so the frontend never gets blocked
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
+ALLOWED_EXT = {'.pdf', '.docx', '.txt'}
+app.config['MAX_CONTENT_LENGTH']= 50 * 1024 * 1024 
+
 DATA_FOLDER = "data"
 INDEX_FILE = os.path.join(DATA_FOLDER, "inverted_index.json")
 META_FILE = os.path.join(DATA_FOLDER, "document_meta.json")
@@ -120,6 +123,9 @@ def upload_file():
         if file.filename == '': continue
             
         safe_filename = secure_filename(file.filename)
+        
+        if not safe_filename or os.path.splitext(safe_filename)[1].lower() not in ALLOWED_EXT:continue
+        
         file_path = os.path.join(DATA_FOLDER, safe_filename)
         file.save(file_path)
         
