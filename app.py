@@ -168,8 +168,10 @@ def upload_file():
 @app.route('/api/search', methods=['GET'])
 def execute_search():
     query = request.args.get('q', '').lower().strip()
-    search_words = [w for w in "".join(e if e.isalnum() or e.isspace() else " " for e in query).split() if len(w) > 1]
     
+    STOPWORDS = {"how", "what", "is", "the", "a", "an", "and", "or", "of", "to", "in", "for", "on", "with", "as", "by", "does", "do", "are", "it", "this", "that"}
+    raw_words = [w for w in "".join(e if e.isalnum() or e.isspace() else " " for e in query).split() if len(w) > 1]
+    search_words = [w for w in raw_words if w not in STOPWORDS]
     # Stem the query so 'routers' become 'router'
     stemmed_words=[stemmer.stem(w) for w in search_words]
     
@@ -221,7 +223,7 @@ def execute_search():
             file_path = os.path.join(DATA_FOLDER, filename)
             raw_text = extract_text(file_path, filename)
             
-        snippet = get_highlighted_snippet(raw_text, query)
+        snippet = get_highlighted_snippet(raw_text, " ".join(search_words))
 
         results.append({
             "title": meta["title"],
