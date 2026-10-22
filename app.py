@@ -141,8 +141,8 @@ def upload_file():
                     del REAL_INVERTED_INDEX[word][safe_filename]
                     if not REAL_INVERTED_INDEX[word]: # Remove empty words
                         del REAL_INVERTED_INDEX[word]
-            
-        words = [w for w in "".join(e if e.isalnum() or e.isspace() else " " for e in text).split() if len(w) > 1]
+        clean_text = re.sub(r'\[?PG:\d+\]?', '', text)
+        words = [w for w in "".join(e if e.isalnum() or e.isspace() else " " for e in clean_text).split() if len(w) > 1]
         
         if not words: continue
             
@@ -252,7 +252,9 @@ def initialize_sample_docs():
         with open(os.path.join(DATA_FOLDER, filename + ".txt"), 'w', encoding='utf-8') as f:
             f.write(text)
         
-        words=[w for w in "".join(e if e.isalnum() or e.isspace() else " " for e in text).split() if len(w) > 1]
+        clean_text = re.sub(r'\[?PG:\d+\]?', '', text)
+        words = [w for w in "".join(e if e.isalnum() or e.isspace() else " " for e in clean_text).split() if len(w) > 1]
+        
         if not words: continue
         
         DOCUMENT_METADATA[filename]={"title": filename, "path":filename, "total_words":len(words)}
