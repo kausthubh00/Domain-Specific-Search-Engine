@@ -4,7 +4,7 @@ A full-stack search engine for academic study material (PDF, DOCX, TXT). It buil
 
 Developed for the Dr. AIT Information Science & Engineering curriculum.
 
-**Live demo:** https://domain-specific-search-engine-10.onrender.com
+**Live demo:** https://domain-specific-search-engine-1.onrender.com
 (Free hosting: the first request after inactivity can take about a minute while the server wakes up.)
 
 ## Screenshots
