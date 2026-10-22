@@ -72,6 +72,26 @@ def extract_text(file_path, filename):
         print(f"[ERROR] Could not read {filename}: {e}")
     return text
 
+def index_document(filename, raw_text):
+    """Strips page markers, removes stopwords, stems, and adds to the inverted index."""
+    clean_text=re.sub(r'\[?PG:\d+\]?', '', raw_text)
+    words = [w for w in "".join(e if e.isalnum() or e.isspace() else " " for e in clean_text).split() if len(w) > 1]
+    if not words:
+        return False
+    DOCUMENT_METADATA[filename]={
+        "title": filename,
+        "path" : filename,
+        "total_words" : len(words)
+    }   
+    for raw_word in words:
+        word=stemmer.stem(raw_word)
+        if word not in REAL_INVERTED_INDEX:
+            REAL_INVERTED_INDEX[word] = {}
+        if filename not in REAL_INVERTED_INDEX[word]:
+            REAL_INVERTED_INDEX[word][filename] = 0
+        REAL_INVERTED_INDEX[word][filename] += 1
+    return True     
+
 def highlight_words(raw_text, query_stems):
     """Escape the text, and wrap every word whose stem matches a query stem in <mark>"""
     out=[]
@@ -141,26 +161,8 @@ def upload_file():
                     del REAL_INVERTED_INDEX[word][safe_filename]
                     if not REAL_INVERTED_INDEX[word]: # Remove empty words
                         del REAL_INVERTED_INDEX[word]
-        clean_text = re.sub(r'\[?PG:\d+\]?', '', text)
-        words = [w for w in "".join(e if e.isalnum() or e.isspace() else " " for e in clean_text).split() if len(w) > 1]
-        
-        if not words: continue
-            
-        DOCUMENT_METADATA[safe_filename] = {
-            "title": safe_filename,
-            "path": safe_filename, 
-            "total_words": len(words)
-        }
-        
-        for raw_word in words:
-            word=stemmer.stem(raw_word)
-            if word not in REAL_INVERTED_INDEX:
-                REAL_INVERTED_INDEX[word] = {}
-            if safe_filename not in REAL_INVERTED_INDEX[word]:
-                REAL_INVERTED_INDEX[word][safe_filename] = 0
-            REAL_INVERTED_INDEX[word][safe_filename] += 1
-            
-        uploaded_names.append(safe_filename)
+        if index_document(safe_filename, text):
+            uploaded_names.append(safe_filename)
         
     save_database()
     return jsonify({"message": f"Successfully uploaded {len(uploaded_names)} of {len(files)} files!"}), 200
@@ -254,19 +256,7 @@ def initialize_sample_docs():
         with open(os.path.join(DATA_FOLDER, filename + ".txt"), 'w', encoding='utf-8') as f:
             f.write(text)
         
-        clean_text = re.sub(r'\[?PG:\d+\]?', '', text)
-        words = [w for w in "".join(e if e.isalnum() or e.isspace() else " " for e in clean_text).split() if len(w) > 1]
-        
-        if not words: continue
-        
-        DOCUMENT_METADATA[filename]={"title": filename, "path":filename, "total_words":len(words)}
-        for raw_word in words:
-            word=stemmer.stem(raw_word)
-            if word not in REAL_INVERTED_INDEX:
-                REAL_INVERTED_INDEX[word]={}
-            if filename not in REAL_INVERTED_INDEX[word]:
-                REAL_INVERTED_INDEX[word][filename] = 0
-            REAL_INVERTED_INDEX[word][filename] += 1;
+        index_document(filename, text)
         
     save_database()
     print("[INFO] Auto-indexing complete!")
