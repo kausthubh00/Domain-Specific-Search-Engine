@@ -73,7 +73,7 @@ def extract_text(file_path, filename):
     return text
 
 def index_document(filename, raw_text):
-    """Strips page markers, removes stopwords, stems, and adds to the inverted index."""
+    """Strips page markers, stems words, and adds them to the inverted index."""
     clean_text=re.sub(r'\[?PG:\d+\]?', '', raw_text)
     words = [w for w in "".join(e if e.isalnum() or e.isspace() else " " for e in clean_text).split() if len(w) > 1]
     if not words:

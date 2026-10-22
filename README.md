@@ -62,6 +62,12 @@ Developed for the Dr. AIT Information Science & Engineering curriculum.
    then restart `npm run dev`.
 4. Open the web page and search. You can also upload more PDFs from the page. The `data/` folder is not stored in the repository.
 
+## Running Tests
+To run the automated `pytest` suite for security, NLP, and ranking validation:
+```bash
+pip install -r requirements-dev.txt
+python -m pytest test_app.py
+```
 ## Evaluation
 Run with `python evaluate.py` while the backend is running. There are **7 indexed documents** (BCS502 modules 1–4, a network-layer unit, a lab manual and a model question paper) and two query sets of 16 queries each. Every result is compared with a **random-order baseline** (the 7 documents shuffled 2,000 times per query).
 

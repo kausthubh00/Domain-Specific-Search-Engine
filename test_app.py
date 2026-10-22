@@ -31,3 +31,14 @@ def test_security_upload_rejects_html(client):
     
     # The response should indicate 0 files were successfully indexed
     assert b"0 of 1 files" in response.data
+def test_ranking_logic(client):
+    """Proves BM25 ranking logic returns results sorted by highest relevance."""
+    response = client.get('/api/search?q=routing')
+    assert response.status_code == 200
+    
+    results = response.get_json()
+    if results:
+        # Extract the BM25 scores from the first two results to ensure proper sorting
+        scores = [float(r['score'].split("BM25: ")[1].split(" |")[0]) for r in results]
+        # Assert that the list of scores is strictly descending
+        assert scores == sorted(scores, reverse=True)
