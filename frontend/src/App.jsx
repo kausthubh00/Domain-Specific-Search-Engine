@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import './App.css'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://domain-specific-search-engine.onrender.com';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://domain-specific-search-engine-10.onrender.com';
 
 function App() {
   // --- STATE VARIABLES ---
